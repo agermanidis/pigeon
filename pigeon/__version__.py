@@ -1,0 +1,8 @@
+__title__ = 'pigeon'
+__description__ = 'Quickly annotate data on Jupyter.'
+__url__ = 'https://github.com/agermanidis/pigeon'
+__version__ = '0.1.0'
+__author__ = 'Anastasis Germanidis'
+__author_email__ = 'agermanidis@gmail.com'
+__license__ = 'Apache 2.0'
+__copyright__ = 'Copyright 2017 Anastasis Germanidis'
