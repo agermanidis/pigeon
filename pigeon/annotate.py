@@ -30,38 +30,34 @@ def annotate(examples,
     if shuffle:
         random.shuffle(examples)
 
-    annotations = []
-    current_index = -1
-
     def set_label_text():
-        nonlocal count_label
-        count_label.value = '{} examples annotated, {} examples left'.format(
-            len(annotations), len(examples) - current_index
+        non_local["count_label"].value = '{} examples annotated, {} examples left'.format(
+            len(annotations), len(examples) - non_local["current_index"]
         )
 
     def show_next():
-        nonlocal current_index
-        current_index += 1
+        non_local["current_index"] += 1
         set_label_text()
-        if current_index >= len(examples):
+        if non_local["current_index"] >= len(examples):
             for btn in buttons:
                 btn.disabled = True
             print('Annotation done.')
             return
         with out:
             clear_output(wait=True)
-            display_fn(examples[current_index])
+            display_fn(examples[non_local["current_index"]])
 
     def add_annotation(annotation):
-        annotations.append((examples[current_index], annotation))
+        annotations.append((examples[non_local["current_index"]], annotation))
         show_next()
 
     def skip(btn):
         show_next()
 
-    count_label = HTML()
+    annotations = []
+    non_local = {"current_index" : -1, "count_label" : HTML()}
     set_label_text()
-    display(count_label)
+    display(non_local["count_label"])
 
     if type(options) == list:
         task_type = 'classification'
