@@ -53,9 +53,13 @@ def annotate(examples,
         nonlocal current_index
         current_index += 1
         set_label_text()
-        update_button_style()
+        # If we reach the end, don't update the buttons.
+        if current_index < len(examples):
+            update_button_style()
         if current_index >= len(examples):
             for btn in buttons:
+                if btn.description == 'back':
+                    continue
                 btn.disabled = True
             print('Annotation done.')
             return
@@ -72,6 +76,10 @@ def annotate(examples,
 
     def back(btn):
         nonlocal current_index
+        # If the annotation was finished. Buttons needs to be re-enabled.
+        if current_index >= len(examples):
+            for btn in buttons:
+                btn.disabled = False
         if current_index is not 0:
             current_index-=2
             show_next()
