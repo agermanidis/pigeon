@@ -1,30 +1,57 @@
 import random
 import functools
 from IPython.display import display, clear_output
-from ipywidgets import Button, Dropdown, HTML, HBox, IntSlider, FloatSlider, Textarea, Output
+from ipywidgets import (
+        Button,
+        Dropdown,
+        HTML,
+        HBox,
+        VBox,
+        IntSlider,
+        FloatSlider,
+        Textarea,
+        Output,
+        ToggleButton
+)
 
 def annotate(examples,
              options=None,
+             task_type='classification',
              shuffle=False,
              include_skip=True,
+             use_dropdown_in_classification=False,
+             buttons_in_a_row=4,
+             reset_buttons_after_click=False,
              display_fn=display):
     """
     Build an interactive widget for annotating a list of input examples.
 
     Parameters
     ----------
-    examples: list(any), list of items to annotate
-    options: list(any) or tuple(start, end, [step]) or None
-             if list: list of labels for binary classification task (Dropdown or Buttons)
-             if tuple: range for regression task (IntSlider or FloatSlider)
-             if None: arbitrary text input (TextArea)
-    shuffle: bool, shuffle the examples before annotating
-    include_skip: bool, include option to skip example while annotating
-    display_fn: func, function for displaying an example to the user
+    examples : list(any), list of items to annotate
+    options  : list(any) or tuple(start, end, [step]) or None
+               if list  : list of labels for multiclass or multilabel classification tasks
+               if tuple : range for regression task (IntSlider or FloatSlider)
+               if None  : arbitrary text input (TextArea)
+    task_type: str, identifier for the annotation task
+               'classification': multi class classification
+               'multi-label-classification': multi label classification
+               'regression': regression type classification
+               'arbitrary': arbitrary text input (captioning)
+
+    Optional parameters
+    ----------
+    shuffle                        : bool, shuffle the examples before annotating
+    include_skip                   : bool, include option to skip example while annotating
+    use_dropdown_in_classification : bool, use dropdown instead of buttons
+    buttons_in_a_row               : int,  amount of buttons per row
+    reset_buttons_after_click      : bool, reset options after each submit
+    display_fn                     : func, function for displaying an example to the user
 
     Returns
     -------
     annotations : list of tuples, list of annotated examples (example, label)
+
     """
     examples = list(examples)
     if shuffle:
@@ -63,21 +90,10 @@ def annotate(examples,
     set_label_text()
     display(count_label)
 
-    if type(options) == list:
-        task_type = 'classification'
-    elif type(options) == tuple and len(options) in [2, 3]:
-        task_type = 'regression'
-    elif options is None:
-        task_type = 'captioning'
-    else:
-        raise Exception('Invalid options')
-
     buttons = []
-    
-    if task_type == 'classification':
-        use_dropdown = len(options) > 5
 
-        if use_dropdown:
+    if task_type == 'classification':
+        if use_dropdown_in_classification:
             dd = Dropdown(options=options)
             display(dd)
             btn = Button(description='submit')
@@ -85,7 +101,6 @@ def annotate(examples,
                 add_annotation(dd.value)
             btn.on_click(on_click)
             buttons.append(btn)
-        
         else:
             for label in options:
                 btn = Button(description=label)
@@ -93,6 +108,24 @@ def annotate(examples,
                     add_annotation(label)
                 btn.on_click(functools.partial(on_click, label))
                 buttons.append(btn)
+
+    elif task_type == 'multilabel-classification':
+        for label in options:
+            tgl = ToggleButton(description=label)
+            buttons.append(tgl)
+        btn = Button(description='submit')
+        def on_click(btn):
+            labels_on = []
+            for tgl in buttons:
+                if (isinstance(tgl, ToggleButton)):
+                    print(tgl.value)
+                    if (tgl.value==True):
+                        labels_on.append(tgl.description)
+                    if (reset_buttons_after_click):
+                        tgl.value=False
+            add_annotation(labels_on)
+        btn.on_click(on_click)
+        buttons.append(btn)
 
     elif task_type == 'regression':
         target_type = type(options[0])
@@ -126,8 +159,12 @@ def annotate(examples,
         btn = Button(description='skip')
         btn.on_click(skip)
         buttons.append(btn)
+    if len(buttons) > buttons_in_a_row:
+        box = VBox([HBox(buttons[x:x + buttons_in_a_row])
+                    for x in range(0, len(buttons), buttons_in_a_row)])
+    else:
+        box = HBox(buttons)
 
-    box = HBox(buttons)
     display(box)
 
     out = Output()
@@ -136,3 +173,4 @@ def annotate(examples,
     show_next()
 
     return annotations
+

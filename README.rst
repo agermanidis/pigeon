@@ -1,4 +1,4 @@
-🐦 pigeon - Quickly annotate data on Jupyter
+🐦 pigeonML - Quickly annotate data on Jupyter
 ========================
 
 Pigeon is a simple widget that lets you quickly annotate a dataset of
@@ -22,7 +22,7 @@ Examples
 
 - Text classification
 
-Code: 
+Code:
 
 .. code-block:: python
 
@@ -39,7 +39,7 @@ Preview:
 
 - Image classification
 
-Code: 
+Code:
 
 .. code-block:: python
 

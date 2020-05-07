@@ -8,11 +8,11 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-NAME = 'pigeon-jupyter'
-DESCRIPTION = 'Quickly annotate data on Jupyter notebooks.'
-URL = 'https://github.com/agermanidis/pigeon'
-EMAIL = 'agermanidis@gmail.com'
-AUTHOR = 'Anastasis Germanidis'
+NAME = 'pigeonML-jupyter'
+DESCRIPTION = 'Quickly annotate data in Jupyter notebooks.'
+URL = 'https://github.com/dennisbakhuis/pigeonML'
+EMAIL = 'agermanidis@gmail.com, dennis@bakhuis.nu'
+AUTHOR = 'Anastasis Germanidis, Dennis Bakhuis'
 
 REQUIRED = [
     'ipywidgets'
@@ -24,7 +24,7 @@ with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 about = {}
-with open(os.path.join(here, 'pigeon', '__version__.py')) as f:
+with open(os.path.join(here, 'pigeonML', '__version__.py')) as f:
     exec(f.read(), about)
 
 
@@ -33,7 +33,7 @@ class PublishCommand(Command):
 
     description = 'Build and publish the package.'
     user_options = []
-    
+
     @staticmethod
     def status(s):
         """Prints things in bold."""
@@ -68,7 +68,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=['pigeon'],
+    packages=['pigeonML'],
     install_requires=REQUIRED,
     include_package_data=True,
     license='Apache 2.0',
@@ -84,7 +84,7 @@ setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Framework :: Jupyter'
     ],
-    # $ setup.py publish support. 
+    # $ setup.py publish support.
     cmdclass={
         'publish': PublishCommand,
     },
