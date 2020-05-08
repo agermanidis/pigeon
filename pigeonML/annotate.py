@@ -118,7 +118,6 @@ def annotate(examples,
             labels_on = []
             for tgl in buttons:
                 if (isinstance(tgl, ToggleButton)):
-                    print(tgl.value)
                     if (tgl.value==True):
                         labels_on.append(tgl.description)
                     if (reset_buttons_after_click):
