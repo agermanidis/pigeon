@@ -1,4 +1,4 @@
-🐦 pigeonML - Quickly annotate data on Jupyter
+🐦 pigeonXT - Quickly annotate data on Jupyter
 ========================
 
 Pigeon is a simple widget that lets you quickly annotate a dataset of
