@@ -8,9 +8,9 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-NAME = 'pigeonML-jupyter'
+NAME = 'pigeonXT-jupyter'
 DESCRIPTION = 'Quickly annotate data in Jupyter notebooks.'
-URL = 'https://github.com/dennisbakhuis/pigeonML'
+URL = 'https://github.com/dennisbakhuis/pigeonXT'
 EMAIL = 'agermanidis@gmail.com, dennis@bakhuis.nu'
 AUTHOR = 'Anastasis Germanidis, Dennis Bakhuis'
 
@@ -24,7 +24,7 @@ with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 about = {}
-with open(os.path.join(here, 'pigeonML', '__version__.py')) as f:
+with open(os.path.join(here, 'pigeonXT', '__version__.py')) as f:
     exec(f.read(), about)
 
 
@@ -68,7 +68,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=['pigeonML'],
+    packages=['pigeonXT'],
     install_requires=REQUIRED,
     include_package_data=True,
     license='Apache 2.0',
