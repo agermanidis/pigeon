@@ -11,8 +11,8 @@ from setuptools import find_packages, setup, Command
 NAME = 'pigeonXT-jupyter'
 DESCRIPTION = 'Quickly annotate data in Jupyter notebooks.'
 URL = 'https://github.com/dennisbakhuis/pigeonXT'
-EMAIL = 'agermanidis@gmail.com, dennis@bakhuis.nu'
-AUTHOR = 'Anastasis Germanidis, Dennis Bakhuis'
+EMAIL = 'dennis@bakhuis.nu'
+AUTHOR = 'Dennis Bakhuis'
 
 REQUIRED = [
     'ipywidgets'
@@ -20,7 +20,7 @@ REQUIRED = [
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
+with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 about = {}
@@ -81,6 +81,8 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Framework :: Jupyter'
     ],
