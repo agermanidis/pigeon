@@ -11,10 +11,10 @@ PigeonXT currently support the following annotation tasks:
 
 Anything that can be displayed on Jupyter
 (text, images, audio, graphs, etc.) can be displayed by pigeon
-by providing the appropriate :code:`display_fn` argument.
+by providing the appropriate `display_fn` argument.
 
-Additionally, custom hooks can be attached to each row update (:code:`example_process_fn`),
-or when the annotating task is complete(:code:`final_process_fn`).
+Additionally, custom hooks can be attached to each row update (`example_process_fn`),
+or when the annotating task is complete(`final_process_fn`).
 
 ## Installation
 PigeonXT obviously needs a Jupyter Lab environment. Futhermore, it requires ipywidgets.
