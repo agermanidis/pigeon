@@ -78,7 +78,7 @@ Code:
 ```
 
 Preview:
-![Jupyter notebook multi-label classification](https://github.com/dennisbakhuis/pigeonXT/tree/master/assets/multilabelexample.png)
+![Jupyter notebook multi-label classification](/assets/multilabelexample.png)
 
 ### Image classification
 Code:
@@ -94,7 +94,7 @@ Code:
 ```
 
 Preview:
-![Jupyter notebook multi-label classification](https://github.com/dennisbakhuis/pigeonXT/tree/master/assets/imagelabelexample.png)
+![Jupyter notebook multi-label classification](/assets/imagelabelexample.png)
 
 ### multi-label text classification with custom hooks
 Code:
