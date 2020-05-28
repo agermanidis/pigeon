@@ -3,7 +3,7 @@ PigeonXT is an extention to the original [Pigeon](https://github.com/agermanidis
 PigeonXT is a simple widget that lets you quickly annotate a dataset of
 unlabeled examples from the comfort of your Jupyter notebook.
 
-Pigeon currently support the following annotation tasks:
+PigeonXT currently support the following annotation tasks:
 - binary / multi-class classification
 - multi-label classification
 - regression tasks
