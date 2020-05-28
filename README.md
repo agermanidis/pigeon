@@ -51,7 +51,7 @@ Code:
 ```
 
 Preview:
-![Jupyter notebook multi-class classification](https://github.com/dennisbakhuis/pigeonXT/tree/master/assets/multiclassexample.png)
+![Jupyter notebook multi-class classification](/assets/multiclassexample.png)
 
 ### multi-label text classification
 Code:
