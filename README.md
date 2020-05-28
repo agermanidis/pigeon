@@ -31,7 +31,7 @@ To run the provided examples in a new environment using Conda:
     pip install numpy pandas jupyterlab ipywidgets
     jupyter nbextension enable --py widgetsnbextension
     jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    
+
     pip install pigeonXT-jupyter
 ```
 
@@ -56,7 +56,7 @@ Code:
 Preview:
 ![Jupyter notebook multi-class classification](/assets/multiclassexample.png)
 
-### multi-label text classification
+### Multi-label text classification
 Code:
 ```python
     from pigeonXT import annotate
@@ -102,6 +102,7 @@ Preview:
 ### multi-label text classification with custom hooks
 Code:
 ```python
+    from pigeonXT import annotate
     import pandas as pd
     import numpy as np
     from pathlib import Path
@@ -180,6 +181,8 @@ Code:
 ```
 
 Preview:
+![Jupyter notebook multi-label classification](/assets/pigeonhookfunctions.png)
 
-The complete and runnable example is available in the provided Notebook.
+
+The complete and runnable examples are available in the provided Notebook.
 
