@@ -29,6 +29,9 @@ To run the provided examples in a new environment using Conda:
     conda activate pigeon
     conda install nodejs
     pip install numpy pandas jupyterlab ipywidgets
+    jupyter nbextension enable --py widgetsnbextension
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    
     pip install pigeonXT-jupyter
 ```
 
