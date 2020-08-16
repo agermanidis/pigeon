@@ -1,6 +1,7 @@
 import random
 from collections import defaultdict
 import functools
+import warnings
 from IPython.display import display, clear_output
 from ipywidgets import (
         Button,
@@ -59,14 +60,14 @@ def annotate(examples,
     annotations = {}
     current_index = -1
 
-    def set_label_text():
+    def set_label_text(index):
         nonlocal count_label
-        count_label.value = '{} examples annotated, {} examples left'.format(
-            len(annotations), len(examples) - len(annotations)
+        count_label.value = '{} of {} Examples annotated, Current Position: {} '.format(
+            len(annotations), len(examples), index
         )
 
     def render(index):
-        set_label_text()
+        set_label_text(index)
 
         for btn in buttons:
             if btn.description == 'prev':
@@ -97,17 +98,19 @@ def annotate(examples,
 
     def next(btn=None):
         nonlocal current_index
-        current_index += 1
-        render(current_index)
+        if current_index < len(examples):
+            current_index += 1
+            render(current_index)
 
     def prev(btn=None):
         nonlocal current_index
-        current_index -= 1
-        render(current_index)
+        if current_index > 0:
+            current_index -= 1
+            render(current_index)
 
 
     count_label = HTML()
-    set_label_text()
+    set_label_text(current_index)
     display(count_label)
 
     buttons = []
@@ -199,5 +202,5 @@ def annotate(examples,
     display(out)
 
     next()
-    return list(annotations.items())
+    return annotations
 
