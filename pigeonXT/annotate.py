@@ -54,13 +54,13 @@ def annotate(examples,
     if shuffle:
         random.shuffle(examples)
 
-    annotations = []
+    annotations = {}
     current_index = -1
 
     def set_label_text():
         nonlocal count_label
         count_label.value = '{} examples annotated, {} examples left'.format(
-            len(annotations), len(examples) - current_index
+            len(annotations), len(examples) - len(annotations)
         )
 
     def show_next():
@@ -72,16 +72,17 @@ def annotate(examples,
                 btn.disabled = True
             print('Annotation done.')
             if final_process_fn is not None:
-                final_process_fn(annotations)
+                final_process_fn(list(annotations.items()))
             return
         with out:
             clear_output(wait=True)
             display_fn(examples[current_index])
 
     def add_annotation(annotation):
-        annotations.append((examples[current_index], annotation))
+        annotations[examples[current_index]] = annotation
         if example_process_fn is not None:
-            example_process_fn(examples[current_index], annotations[-1][1])
+            example_process_fn(
+                examples[current_index], annotations[examples[current_index]])
         show_next()
 
     def skip(btn):
@@ -173,6 +174,5 @@ def annotate(examples,
     display(out)
 
     show_next()
-
-    return annotations
+    return list(annotations.items())
 
