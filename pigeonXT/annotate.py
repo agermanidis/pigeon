@@ -42,6 +42,7 @@ def annotate(examples,
                     - tuple with a range for regression tasks
     shuffle     : bool, shuffle the examples before annotating
     include_skip: bool, include option to skip example while annotating
+    include_back: bool, include option to navigate to previous example
     use_dropdown: use a dropdown or buttons during classification
     buttons_in_a_row: number of buttons in a row during classification
     reset_buttons_after_click: reset multi-label buttons after each click
@@ -73,7 +74,7 @@ def annotate(examples,
             if btn.description == 'prev':
                 btn.disabled = index <= 0
             elif btn.description == 'skip':
-                btn.disabled = index >= len(examples)
+                btn.disabled = index >= len(examples) - 1
             elif examples[index] in annotations:
                 if isinstance(annotations[examples[index]], list):
                     btn.disabled = btn.description in annotations[examples[index]]
