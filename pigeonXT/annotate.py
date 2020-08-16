@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 import functools
 from IPython.display import display, clear_output
 from ipywidgets import (
@@ -19,6 +20,7 @@ def annotate(examples,
              options=None,
              shuffle=False,
              include_skip=True,
+             include_back=False,
              use_dropdown=False,
              buttons_in_a_row=4,
              reset_buttons_after_click=False,
@@ -63,30 +65,46 @@ def annotate(examples,
             len(annotations), len(examples) - len(annotations)
         )
 
-    def show_next():
-        nonlocal current_index
-        current_index += 1
+    def render(index):
         set_label_text()
-        if current_index >= len(examples):
-            for btn in buttons:
-                btn.disabled = True
+
+        for btn in buttons:
+            if btn.description == 'prev':
+                btn.disabled = index <= 0
+            elif btn.description == 'skip':
+                btn.disabled = index >= len(examples)
+            elif examples[index] in annotations:
+                if isinstance(annotations[examples[index]], list):
+                    btn.disabled = btn.description in annotations[examples[index]]
+                else: 
+                    btn.disabled = btn.description == annotations[examples[index]]
+                
+        if index >= len(examples):
             print('Annotation done.')
             if final_process_fn is not None:
                 final_process_fn(list(annotations.items()))
             return
+        
         with out:
             clear_output(wait=True)
-            display_fn(examples[current_index])
+            display_fn(examples[index])
 
     def add_annotation(annotation):
         annotations[examples[current_index]] = annotation
         if example_process_fn is not None:
-            example_process_fn(
-                examples[current_index], annotations[examples[current_index]])
-        show_next()
+            example_process_fn(examples[current_index], annotation)
+        next()
 
-    def skip(btn):
-        show_next()
+    def next(btn=None):
+        nonlocal current_index
+        current_index += 1
+        render(current_index)
+
+    def prev(btn=None):
+        nonlocal current_index
+        current_index -= 1
+        render(current_index)
+
 
     count_label = HTML()
     set_label_text()
@@ -141,7 +159,7 @@ def annotate(examples,
             min_val, max_val, step_val = options
             slider = cls(min=min_val, max=max_val, step=step_val)
         display(slider)
-        btn = Button(description='submit')
+        btn = Button(description='submit', value='submit')
         def on_click(btn):
             add_annotation(slider.value)
         btn.on_click(on_click)
@@ -158,10 +176,17 @@ def annotate(examples,
     else:
         raise ValueError('invalid task type')
 
+
+    if include_back:
+        btn = Button(description='prev', button_style='info')
+        btn.on_click(prev)
+        buttons.append(btn)
+
     if include_skip:
         btn = Button(description='skip', button_style='info')
-        btn.on_click(skip)
+        btn.on_click(next)
         buttons.append(btn)
+
     if len(buttons) > buttons_in_a_row:
         box = VBox([HBox(buttons[x:x + buttons_in_a_row])
                     for x in range(0, len(buttons), buttons_in_a_row)])
@@ -173,6 +198,6 @@ def annotate(examples,
     out = Output()
     display(out)
 
-    show_next()
+    next()
     return list(annotations.items())
 
