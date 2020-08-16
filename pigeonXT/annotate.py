@@ -174,5 +174,5 @@ def annotate(examples,
     display(out)
 
     show_next()
-    return list(annotations.items())
+    return annotations
 
