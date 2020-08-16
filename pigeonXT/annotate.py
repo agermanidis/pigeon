@@ -80,7 +80,7 @@ def annotate(examples,
 
     def add_annotation(annotation):
         annotations.append((examples[current_index], annotation))
-        if example_process_fn is not None and current_index > 0:
+        if example_process_fn is not None:
             example_process_fn(examples[current_index], annotations[-1][1])
         show_next()
 
