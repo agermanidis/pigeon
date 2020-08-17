@@ -66,8 +66,6 @@ def annotate(examples,
     def show_next():
         nonlocal current_index
         current_index += 1
-        if example_process_fn is not None and current_index > 0:
-            example_process_fn(current_index - 1, annotations[-1][1])
         set_label_text()
         if current_index >= len(examples):
             for btn in buttons:
@@ -82,6 +80,8 @@ def annotate(examples,
 
     def add_annotation(annotation):
         annotations.append((examples[current_index], annotation))
+        if example_process_fn is not None:
+            example_process_fn(examples[current_index], annotations[-1][1])
         show_next()
 
     def skip(btn):

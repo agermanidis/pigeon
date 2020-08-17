@@ -153,10 +153,10 @@ Code:
         for label in shortLabels:
             indf[label] = None
 
-        def updateRow(ix, selectedLabels):
-            print(ix, selectedLabels)
+        def updateRow(title, selectedLabels):
+            print(title, selectedLabels)
             labs = setLabels([labels.index(y) for y in selectedLabels], len(labels))
-            indf.loc[indf.index.min()+ix, shortLabels] = labs
+            indf.loc[indf.title == title, shortLabels] = labs
 
         def finalProcessing(annotations):
             if out.exists():
