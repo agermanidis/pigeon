@@ -18,6 +18,11 @@ or when the annotating task is complete(`final_process_fn`).
 
 There is a full blog post on the usage of PigeonXT on [Towards Data Science](https://towardsdatascience.com/quickly-label-data-in-jupyter-lab-999e7e455e9e).
 
+### Contributors
+- Anastasis Germanidis
+- Dennis Bakhuis
+- Ritesh Agrawal
+
 ## Installation
 PigeonXT obviously needs a Jupyter Lab environment. Futhermore, it requires ipywidgets.
 The widget itself can be installed using pip:

@@ -63,12 +63,19 @@ def annotate(examples,
 
     def set_label_text(index):
         nonlocal count_label
-        count_label.value = '{} of {} Examples annotated, Current Position: {} '.format(
-            len(annotations), len(examples), index
-        )
+        count_label.value = f'{len(annotations)} of {len(examples)} Examples annotated, Current Position: {index + 1} '
 
     def render(index):
         set_label_text(index)
+
+        if index >= len(examples):
+            print('Annotation done.')
+            if final_process_fn is not None:
+                final_process_fn(list(annotations.items()))
+            for btn in buttons:
+                btn.disabled = True
+            count_label.value = f'{len(annotations)} of {len(annotations)} Examples annotated, Current Position: {len(annotations)} '
+            return
 
         for btn in buttons:
             if btn.description == 'prev':
@@ -77,33 +84,23 @@ def annotate(examples,
                 btn.disabled = index >= len(examples) - 1
             elif examples[index] in annotations:
                 if isinstance(annotations[examples[index]], list):
-                    btn.disabled = btn.description in annotations[examples[index]]
+                    btn.value = btn.description in annotations[examples[index]]
                 else: 
-                    btn.disabled = btn.description == annotations[examples[index]]
-                
-        if index >= len(examples):
-            print('Annotation done.')
-            if final_process_fn is not None:
-                final_process_fn(list(annotations.items()))
-            return
-        
-        with out:
-            clear_output(wait=True)
-            display_fn(examples[index])
+                    btn.value = btn.description == annotations[examples[index]]
 
     def add_annotation(annotation):
         annotations[examples[current_index]] = annotation
         if example_process_fn is not None:
             example_process_fn(examples[current_index], annotation)
-        next()
+        next_example()
 
-    def next(btn=None):
+    def next_example(btn=None):
         nonlocal current_index
         if current_index < len(examples):
             current_index += 1
             render(current_index)
 
-    def prev(btn=None):
+    def prev_example(btn=None):
         nonlocal current_index
         if current_index > 0:
             current_index -= 1
@@ -183,12 +180,12 @@ def annotate(examples,
 
     if include_back:
         btn = Button(description='prev', button_style='info')
-        btn.on_click(prev)
+        btn.on_click(prev_example)
         buttons.append(btn)
 
     if include_skip:
         btn = Button(description='skip', button_style='info')
-        btn.on_click(next)
+        btn.on_click(next_example)
         buttons.append(btn)
 
     if len(buttons) > buttons_in_a_row:
@@ -202,6 +199,6 @@ def annotate(examples,
     out = Output()
     display(out)
 
-    next()
+    next_example()
     return annotations
 
