@@ -85,8 +85,12 @@ def annotate(examples,
             elif examples[index] in annotations:
                 if isinstance(annotations[examples[index]], list):
                     btn.value = btn.description in annotations[examples[index]]
-                else: 
+                else:
                     btn.value = btn.description == annotations[examples[index]]
+
+        with out:
+            clear_output(wait=True)
+            display_fn(examples[index])
 
     def add_annotation(annotation):
         annotations[examples[current_index]] = annotation
