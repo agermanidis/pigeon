@@ -22,6 +22,7 @@ There is a full blog post on the usage of PigeonXT on [Towards Data Science](htt
 - Anastasis Germanidis
 - Dennis Bakhuis
 - Ritesh Agrawal
+- Deepak Tunuguntla
 
 ## Installation
 PigeonXT obviously needs a Jupyter Lab environment. Futhermore, it requires ipywidgets.
