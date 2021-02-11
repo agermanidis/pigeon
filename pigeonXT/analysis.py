@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 def get_number_of_annotations_per_label(annotations, labels):
     """
     Gets the number of annotations per label
