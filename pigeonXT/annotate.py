@@ -16,6 +16,7 @@ from ipywidgets import (
         ToggleButton
 )
 
+
 def annotate(examples,
              task_type='classification',
              options=None,
@@ -72,21 +73,22 @@ def annotate(examples,
             print('Annotation done.')
             if final_process_fn is not None:
                 final_process_fn(list(annotations.items()))
-            for btn in buttons:
-                btn.disabled = True
-            count_label.value = f'{len(annotations)} of {len(annotations)} Examples annotated, Current Position: {len(annotations)} '
+            for button in buttons:
+                button.disabled = True
+            count_label.value = \
+                f'{len(annotations)} of {len(annotations)} Examples annotated, Current Position: {len(annotations)} '
             return
 
-        for btn in buttons:
-            if btn.description == 'prev':
-                btn.disabled = index <= 0
-            elif btn.description == 'skip':
-                btn.disabled = index >= len(examples) - 1
+        for button in buttons:
+            if button.description == 'prev':
+                button.disabled = index <= 0
+            elif button.description == 'skip':
+                button.disabled = index >= len(examples) - 1
             elif examples[index] in annotations:
                 if isinstance(annotations[examples[index]], list):
-                    btn.value = btn.description in annotations[examples[index]]
+                    button.value = button.description in annotations[examples[index]]
                 else:
-                    btn.value = btn.description == annotations[examples[index]]
+                    button.value = button.description == annotations[examples[index]]
 
         with out:
             clear_output(wait=True)
@@ -98,18 +100,17 @@ def annotate(examples,
             example_process_fn(examples[current_index], annotation)
         next_example()
 
-    def next_example(btn=None):
+    def next_example(button=None):
         nonlocal current_index
         if current_index < len(examples):
             current_index += 1
             render(current_index)
 
-    def prev_example(btn=None):
+    def prev_example(button=None):
         nonlocal current_index
         if current_index > 0:
             current_index -= 1
             render(current_index)
-
 
     count_label = HTML()
     set_label_text(current_index)
@@ -122,15 +123,19 @@ def annotate(examples,
             dd = Dropdown(options=options)
             display(dd)
             btn = Button(description='submit')
-            def on_click(btn):
+
+            def on_click(button):
                 add_annotation(dd.value)
+
             btn.on_click(on_click)
             buttons.append(btn)
         else:
             for label in options:
                 btn = Button(description=label)
-                def on_click(label, btn):
-                    add_annotation(label)
+
+                def on_click(lbl, button):
+                    add_annotation(lbl)
+
                 btn.on_click(functools.partial(on_click, label))
                 buttons.append(btn)
 
@@ -139,15 +144,17 @@ def annotate(examples,
             tgl = ToggleButton(description=label)
             buttons.append(tgl)
         btn = Button(description='submit', button_style='info')
-        def on_click(btn):
+
+        def on_click(button):
             labels_on = []
-            for tgl in buttons:
-                if (isinstance(tgl, ToggleButton)):
-                    if (tgl.value==True):
-                        labels_on.append(tgl.description)
-                    if (reset_buttons_after_click):
-                        tgl.value=False
+            for tgl_btn in buttons:
+                if isinstance(tgl_btn, ToggleButton):
+                    if tgl_btn.value:
+                        labels_on.append(tgl_btn.description)
+                    if reset_buttons_after_click:
+                        tgl_btn.value = False
             add_annotation(labels_on)
+
         btn.on_click(on_click)
         buttons.append(btn)
 
@@ -165,8 +172,10 @@ def annotate(examples,
             slider = cls(min=min_val, max=max_val, step=step_val)
         display(slider)
         btn = Button(description='submit', value='submit')
-        def on_click(btn):
+
+        def on_click(button):
             add_annotation(slider.value)
+
         btn.on_click(on_click)
         buttons.append(btn)
 
@@ -174,13 +183,14 @@ def annotate(examples,
         ta = Textarea()
         display(ta)
         btn = Button(description='submit')
-        def on_click(btn):
+
+        def on_click(button):
             add_annotation(ta.value)
+
         btn.on_click(on_click)
         buttons.append(btn)
     else:
         raise ValueError('invalid task type')
-
 
     if include_back:
         btn = Button(description='prev', button_style='info')
@@ -205,4 +215,3 @@ def annotate(examples,
 
     next_example()
     return annotations
-
