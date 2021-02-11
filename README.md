@@ -53,11 +53,19 @@ Examples are also provided in the accompanying notebook.
 ### Binary or multi-class text classification
 Code:
 ```python
-    from pigeonXT import annotate
-    annotations = annotate(
+    import pandas as pd
+    import pigeonXT as pixt
+    
+    annotations = pixt.annotate(
       ['I love this movie', 'I was really disappointed by the book'],
       options=['positive', 'negative', 'inbetween']
     )
+    
+    # Get number of examples annotated per label
+    count = pixt.get_number_of_annotations_per_label(annotations, labels=['positive', 'negative', 'inbetween'])
+    
+    # To display the count in jupyter notebook
+    display(pd.DataFrame.from_dict([count]))
 ```
 
 Preview:
@@ -66,8 +74,8 @@ Preview:
 ### Multi-label text classification
 Code:
 ```python
-    from pigeonXT import annotate
     import pandas as pd
+    import pigeonXT as pixt
 
     df = pd.DataFrame([
         {'title': 'Star wars'},
@@ -79,12 +87,18 @@ Code:
 
     labels = ['Adventure', 'Romance', 'Fantasy', 'Science fiction', 'Horror', 'Thriller']
 
-    annotations = annotate( df.title,
+    annotations = pixt.annotate( df.title,
                           options=labels,
                           task_type='multilabel-classification',
                           buttons_in_a_row=3,
                           reset_buttons_after_click=True,
                           include_skip=True)
+
+    # Get number of examples annotated per label
+    count = pixt.get_number_of_annotations_per_label(annotations, labels=['positive', 'negative', 'inbetween'])
+    
+    # To display the count in jupyter notebook
+    display(pd.DataFrame.from_dict([count]))
 ```
 
 Preview:
@@ -93,14 +107,22 @@ Preview:
 ### Image classification
 Code:
 ```python
-    from pigeonXT import annotate
+    import pandas as pd
+    import pigeonXT as pixt
+
     from IPython.display import display, Image
 
-    annotations = annotate(
+    annotations = pixt.annotate(
       ['assets/img_example1.jpg', 'assets/img_example2.jpg'],
       options=['cat', 'dog', 'horse'],
       display_fn=lambda filename: display(Image(filename))
     )
+
+    # Get number of examples annotated per label
+    count = pixt.get_number_of_annotations_per_label(annotations, labels=['cat', 'dog', 'horse'])
+
+    # display the count
+    display(pd.DataFrame.from_dict([count]))
 ```
 
 Preview:
@@ -109,11 +131,11 @@ Preview:
 ### multi-label text classification with custom hooks
 Code:
 ```python
-    from pigeonXT import annotate
     import pandas as pd
     import numpy as np
-    from pathlib import Path
 
+    from pathlib import Path
+    from pigeonXT import annotate
 
     df = pd.DataFrame([
         {'title': 'Star wars'},
@@ -181,10 +203,21 @@ Code:
                               final_process_fn=finalProcessing)
         return indf
 
-
+    def getAnnotationsCountPerlabel(annotations, shortLabels):
+    
+        countPerLabel = pd.DataFrame(columns=shortLabels, index=['count'])
+    
+        for label in shortLabels:
+            countPerLabel.loc['count', label] = len(annotations.loc[annotations[label] == 1.0])
+    
+        return countPerLabel
+    
     annotations = labelPortion('inputtestdata.csv',
                                labels=labels,
                                shortLabels= shortLabels)
+
+    # counts per label
+    getAnnotationsCountPerlabel(annotations, shortLabels)
 ```
 
 Preview:
