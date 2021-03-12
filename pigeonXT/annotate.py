@@ -20,6 +20,7 @@ from ipywidgets import (
 def annotate(examples,
              task_type='classification',
              options=None,
+             previous_annotations=None,
              shuffle=False,
              include_skip=True,
              include_back=False,
@@ -28,7 +29,8 @@ def annotate(examples,
              reset_buttons_after_click=False,
              example_process_fn=None,
              final_process_fn=None,
-             display_fn=display):
+             display_fn=display,
+):
     """
     Build an interactive widget for annotating a list of input examples.
     Parameters
@@ -41,6 +43,11 @@ def annotate(examples,
     options     : depending on the task this can be:
                     - list of options
                     - tuple with a range for regression tasks
+    previous_annotations: dict(sentence: str: list(labels))
+                  a dictionary with the sentence as key and a list of
+                  labels as values. This is identical to the output of
+                  the annotate function. Providing the previous
+                  annotations will
     shuffle     : bool, shuffle the examples before annotating
     include_skip: bool, include option to skip example while annotating
     include_back: bool, include option to navigate to previous example
@@ -53,13 +60,16 @@ def annotate(examples,
 
     Returns
     -------
-    annotations : list of tuples, list of annotated examples (example, label(s))
+    annotations : dictionary with sentence as key and list of labels as value
     """
     examples = list(examples)
     if shuffle:
         random.shuffle(examples)
 
-    annotations = {}
+    if previous_annotations is not None:
+        annotations = previous_annotations.copy()
+    else:
+        annotations = {}
     current_index = -1
 
     def set_label_text(index):
