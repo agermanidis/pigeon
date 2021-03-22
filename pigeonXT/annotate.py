@@ -172,7 +172,8 @@ def annotate(
         labeled = len(annotations.loc[annotations['changed']])
         str_output =  f'{labeled} of {len(annotations)} Examples annotated, Current Position: {index + 1} '
         if id_column in annotations.columns and index >= 0 and index < len(annotations):
-            str_output += f"(id: {annotations.at[index, id_column]}) "
+            ix = annotations.iloc[index].name
+            str_output += f"(id: {annotations.at[ix, id_column]}) "
         count_label.value = str_output
 
     def render(index):
@@ -192,6 +193,7 @@ def annotate(
                 prev_example()
             return
         # render buttons
+        ix = annotations.iloc[index].name
         for button in buttons:
             if button.description == 'prev':
                 # disable previous button when at first example
@@ -201,28 +203,28 @@ def annotate(
                 button.disabled = index >= len(annotations) - 1
             elif button.description != 'submit':
                 if task_type == 'classification':
-                    if annotations.at[index, value_column] == button.description:
+                    if annotations.at[ix, value_column] == button.description:
                         button.icon = 'check'
                     else:
                         button.icon = ''
                 elif task_type == 'multilabel-classification':
-                    button.value = bool(annotations.at[index, button.description])
+                    button.value = bool(annotations.at[ix, button.description])
         # render dropdown
         if use_dropdown:
-            current_value = annotations.at[index, value_column]
+            current_value = annotations.at[ix, value_column]
             if current_value in dd.options:
                 dd.value = current_value
         # slider while regression
         if task_type == 'regression':
-            slider.value = annotations.at[index, value_column]
+            slider.value = annotations.at[ix, value_column]
         # captioning
         if task_type == 'captioning':
-            ta.value = annotations.at[index, value_column]
+            ta.value = annotations.at[ix, value_column]
 
         # display new example
         with out:
             clear_output(wait=True)
-            display_fn(annotations.at[index, example_column])
+            display_fn(annotations.at[ix, example_column])
 
     def add_annotation(annotation):
         """
@@ -230,15 +232,16 @@ def annotate(
         """
         if return_type == 'dict':
             annotations_dict[annotations.at[current_index, example_column]] = annotation
+        ix = annotations.iloc[current_index].name
         if task_type == 'multilabel-classification':
             for label in options:
-                annotations.at[current_index, label] = label in annotation
+                annotations.at[ix, label] = label in annotation
         else:
             # multi-class, regression, captioning
-            annotations.at[current_index, value_column] = annotation
-        annotations.at[current_index, 'changed'] = True
+            annotations.at[ix, value_column] = annotation
+        annotations.at[ix, 'changed'] = True
         if example_process_fn is not None:
-            example_process_fn(annotations.at[current_index, example_column], annotation)
+            example_process_fn(annotations.at[ix, example_column], annotation)
         next_example()
 
     def next_example(button=None):
