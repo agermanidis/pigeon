@@ -15,108 +15,245 @@ from ipywidgets import (
         Output,
         ToggleButton
 )
+import pandas as pd
 
-
-def annotate(examples,
-             task_type='classification',
-             options=None,
-             previous_annotations=None,
-             shuffle=False,
-             include_skip=True,
-             include_back=False,
-             use_dropdown=False,
-             buttons_in_a_row=4,
-             reset_buttons_after_click=False,
-             example_process_fn=None,
-             final_process_fn=None,
-             display_fn=display,
+def annotate(
+    examples,
+    task_type='classification',
+    options=None,
+    shuffle=False,
+    
+    include_next=True,
+    include_back=True,
+    stop_at_last_example=True,
+    use_dropdown=False,
+    buttons_in_a_row=4,
+    reset_buttons_after_click=True,
+    
+    example_process_fn=None,
+    final_process_fn=None,
+    display_fn=display,
+    
+    example_column='example',
+    value_column='label',
+    id_column='id',
+    return_type='dataframe',
 ):
     """
-    Build an interactive widget for annotating a list of input examples.
+    Build an interactive widget for annotating a list or DataFrame of input examples.
+    
     Parameters
     ----------
-    examples    : list(any), list of items to annotate
-    task_type   : possible options are:
+    examples    : list or pandas.DataFrame
+                    This can be a list of any type or a Pandas dataframe.
+                    
+                    If using a DataFrame, make sure that at least the example_column
+                    is set to the column holding the examples.
+                    
+                    When a DataFrame of a previous annotation is provided, it can
+                    be relabeled and shows previous selected labels.
+    task_type   : str
+                    Possible options are:
                     - classification
                     - multilabel-classification
+                    - regression
                     - captioning
-    options     : depending on the task this can be:
-                    - list of options
+    options     : list, tuple, or None
+                    Depending on the task this can be:
+                    - list of str for (multilabel) classification.
                     - tuple with a range for regression tasks
-    previous_annotations: dict(sentence: str: list(labels))
-                  a dictionary with the sentence as key and a list of
-                  labels as values. This is identical to the output of
-                  the annotate function. Providing the previous
-                  annotations will
-    shuffle     : bool, shuffle the examples before annotating
-    include_skip: bool, include option to skip example while annotating
-    include_back: bool, include option to navigate to previous example
-    use_dropdown: use a dropdown or buttons during classification
-    buttons_in_a_row: number of buttons in a row during classification
-    reset_buttons_after_click: reset multi-label buttons after each click
-    example_process_fn: hooked function to call after each example fn(ix, labels)
-    final_process_fn: hooked function to call after annotation is done fn(annotations)
-    display_fn  : func, function for displaying an example to the user
+                    - None (actually ignored) for captioning
+                    
+    shuffle                   : bool, shuffle the examples before annotating
+    include_skip              : bool, include option to skip example while annotating
+    include_back              : bool, include option to navigate to previous example
+    use_dropdown              : bool, use a dropdown or buttons during classification
+    buttons_in_a_row          : int, number of buttons in a row during classification
+    reset_buttons_after_click : bool, reset multi-label buttons after each click
+    
+    example_process_fn : function, hooked function to call after each example fn(ix, labels)
+    final_process_fn   : function, hooked function to call after annotation is done fn(annotations)
+    display_fn         : function, function for displaying an example to the user
+                          Default, it uses the IPython display function
+    
+    example_column : str, column name which holds all examples. Required when using DataFrame
+    value_column   : str
+                        column to store the result for classification (not for multilabel), regression,
+                        captioning. For multilabel, each option will be a column in the dataframe.
+    id_column      : str, optional
+                        Column name which holds the id of the example. If available, will be shown in
+                        the progress row.
+    return_type    : str, 'dataframe' or 'dict'
+                        By default, annotate will return a DataFrame with the annotations. For compatability,
+                        when return_type is 'dict' it can also return a dictionary with changed annotations.
 
     Returns
     -------
-    annotations : dictionary with sentence as key and list of labels as value
+    annotations : pandas.DataFrame or dict
+                    Depending on return_type it will return a DataFrame (preferred) or a dict with the
+                    annotations.
+                    
+                    The dict will have the form: {example: label} and only return the labeled examples that
+                    are changed (using the submit button).
+                    
+                    The DataFrame will have a column with the examples and if it is multilabel, a column for
+                    each label. For regular classification, the labeled values are in the value_column. When
+                    a DataFrame is used as input, all other columns such as id, are kept intact.
     """
-    examples = list(examples)
-    if shuffle:
-        random.shuffle(examples)
+    # Parameter checkes
+    task_type = task_type.lower()
+    if task_type not in [
+        'classification',
+        'multilabel-classification',
+        'regression',
+        'captioning',
+    ]:
+        raise ValueError("task_type should be 'classification', 'multilabel-classification', 'regression', or 'captioning'")
+        
+    if not isinstance(examples, (list, pd.DataFrame)):
+        raise TypeError('examples should be of type list or pandas.DataFrame')
 
-    if previous_annotations is not None:
-        annotations = previous_annotations.copy()
+    if task_type == 'regression':
+        if not isinstance(options, tuple):
+            raise TypeError('options should be of type tuple for regression tasks')
+        if len(options) != 2 and len(options) != 3:
+            raise ValueError('options should be a tuple (min, max) or (min, max, step)')
+
+    if task_type in ['multilabel-classification', 'classification']:
+        if not isinstance(options, list):
+            raise TypeError('options should be of type list for classification tasks')
+    
+    return_type = return_type.lower()
+    if return_type not in ['dataframe', 'dict']:
+        raise TypeError("return_type should be 'dataframe' or 'dict'")        
+    
+    # create annotations object as DataFrame
+    if isinstance(examples, pd.DataFrame):
+        # Examples is a dataframe
+        annotations = examples.copy()
+        annotations['changed'] = False 
     else:
-        annotations = {}
+        # Examples is a list
+        annotations = pd.DataFrame({
+            example_column: examples,
+            'changed': False,
+        })
+    
+    # add options as columns
+    if isinstance(options, list):
+        # list of labels
+        if task_type == 'classification':
+            annotations[value_column] = ''
+        else:
+            for label in options:
+                if label not in annotations.columns:
+                    annotations[label] = False
+    elif isinstance(options, tuple):
+        # regression
+        if value_column not in annotations.columns:
+            annotations[value_column] = 0
+    else:
+        # captioning
+        if value_column not in annotations.columns:
+            annotations[value_column] = ''
+            
+    # shuffle if needed
+    if shuffle:
+        annotations = annotations.sample(frac=1).copy()
+      
     current_index = -1
+    annotations_dict = {}
 
     def set_label_text(index):
+        """
+        Create info string with annotation progress
+        """
         nonlocal count_label
-        count_label.value = f'{len(annotations)} of {len(examples)} Examples annotated, Current Position: {index + 1} '
+        labeled = len(annotations.loc[annotations['changed']])
+        str_output =  f'{labeled} of {len(annotations)} Examples annotated, Current Position: {index + 1} '
+        if id_column in annotations.columns and index >= 0 and index < len(annotations):
+            str_output += f"(id: {annotations.at[index, id_column]}) "
+        count_label.value = str_output
 
     def render(index):
+        """
+        Render current index of the annotation
+        """
         set_label_text(index)
-
-        if index >= len(examples):
-            print('Annotation done.')
-            if final_process_fn is not None:
-                final_process_fn(list(annotations.items()))
-            for button in buttons:
-                button.disabled = True
-            count_label.value = \
-                f'{len(annotations)} of {len(annotations)} Examples annotated, Current Position: {len(annotations)} '
+        if index >= len(annotations):
+            if stop_at_last_example:
+                print('Annotation done.')
+                if final_process_fn is not None:
+                    final_process_fn(annotations)
+                for button in buttons:
+                    button.disabled = True
+                set_label_text(index - 1)
+            else:
+                prev_example()
             return
-
+        # render buttons
         for button in buttons:
             if button.description == 'prev':
+                # disable previous button when at first example
                 button.disabled = index <= 0
-            elif button.description == 'skip':
-                button.disabled = index >= len(examples) - 1
-            elif examples[index] in annotations:
-                if isinstance(annotations[examples[index]], list):
-                    button.value = button.description in annotations[examples[index]]
-                else:
-                    button.value = button.description == annotations[examples[index]]
+            elif button.description == 'next':
+                # disable skip button when at last example
+                button.disabled = index >= len(annotations) - 1
+            elif button.description != 'submit':
+                if task_type == 'classification':
+                    if annotations.at[index, value_column] == button.description:
+                        button.icon = 'check'
+                    else:
+                        button.icon = ''
+                elif task_type == 'multilabel-classification':
+                    button.value = bool(annotations.at[index, button.description])
+        # render dropdown
+        if use_dropdown:
+            current_value = annotations.at[index, value_column]
+            if current_value in dd.options:
+                dd.value = current_value
+        # slider while regression
+        if task_type == 'regression':
+            slider.value = annotations.at[index, value_column]
+        # captioning
+        if task_type == 'captioning':
+            ta.value = annotations.at[index, value_column]
 
+        # display new example
         with out:
             clear_output(wait=True)
-            display_fn(examples[index])
+            display_fn(annotations.at[index, example_column])
 
     def add_annotation(annotation):
-        annotations[examples[current_index]] = annotation
+        """
+        Toggle annotation
+        """
+        if return_type == 'dict':
+            annotations_dict[annotations.at[current_index, example_column]] = annotation
+        if task_type == 'multilabel-classification':
+            for label in options:
+                annotations.at[current_index, label] = label in annotation
+        else:
+            # multi-class, regression, captioning
+            annotations.at[current_index, value_column] = annotation
+        annotations.at[current_index, 'changed'] = True
         if example_process_fn is not None:
-            example_process_fn(examples[current_index], annotation)
+            example_process_fn(annotations.at[current_index, example_column], annotation)
         next_example()
 
     def next_example(button=None):
+        """
+        Increase current index
+        """
         nonlocal current_index
-        if current_index < len(examples):
+        if current_index < len(annotations):
             current_index += 1
             render(current_index)
 
     def prev_example(button=None):
+        """
+        Decrease current index
+        """
         nonlocal current_index
         if current_index > 0:
             current_index -= 1
@@ -125,9 +262,8 @@ def annotate(examples,
     count_label = HTML()
     set_label_text(current_index)
     display(count_label)
-
     buttons = []
-
+    
     if task_type == 'classification':
         if use_dropdown:
             dd = Dropdown(options=options)
@@ -148,7 +284,7 @@ def annotate(examples,
 
                 btn.on_click(functools.partial(on_click, label))
                 buttons.append(btn)
-
+            
     elif task_type == 'multilabel-classification':
         for label in options:
             tgl = ToggleButton(description=label)
@@ -167,13 +303,16 @@ def annotate(examples,
 
         btn.on_click(on_click)
         buttons.append(btn)
-
+        
     elif task_type == 'regression':
+        # check if tuple is int or float
         target_type = type(options[0])
         if target_type == int:
             cls = IntSlider
         else:
             cls = FloatSlider
+
+        # create slider
         if len(options) == 2:
             min_val, max_val = options
             slider = cls(min=min_val, max=max_val)
@@ -181,11 +320,11 @@ def annotate(examples,
             min_val, max_val, step_val = options
             slider = cls(min=min_val, max=max_val, step=step_val)
         display(slider)
-        btn = Button(description='submit', value='submit')
 
+        # submit button
+        btn = Button(description='submit', value='submit')
         def on_click(button):
             add_annotation(slider.value)
-
         btn.on_click(on_click)
         buttons.append(btn)
 
@@ -207,8 +346,8 @@ def annotate(examples,
         btn.on_click(prev_example)
         buttons.append(btn)
 
-    if include_skip:
-        btn = Button(description='skip', button_style='info')
+    if include_next:
+        btn = Button(description='next', button_style='info')
         btn.on_click(next_example)
         buttons.append(btn)
 
@@ -224,4 +363,9 @@ def annotate(examples,
     display(out)
 
     next_example()
-    return annotations
+    
+    # return object
+    if return_type == 'dataframe':
+        return annotations
+    else:
+        return annotations_dict

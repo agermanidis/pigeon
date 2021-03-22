@@ -31,7 +31,15 @@ The widget itself can be installed using pip:
     pip install pigeonXT-jupyter
 ```
 
+Currently, it is much easier to install due to Jupyterlab 3:
 To run the provided examples in a new environment using Conda:
+```bash
+    conda create --name pigeon python=3.9
+    conda activate pigeon
+    pip install numpy pandas jupyterlab ipywidgets pigeonXT-jupyter
+```
+
+For an older Jupyterlab or any other trouble, please try the old method:
 ```bash
     conda create --name pigeon python=3.7
     conda activate pigeon
@@ -58,15 +66,9 @@ Code:
     import pigeonXT as pixt
     
     annotations = pixt.annotate(
-      ['I love this movie', 'I was really disappointed by the book'],
-      options=['positive', 'negative', 'inbetween']
+        ['I love this movie', 'I was really disappointed by the book'],
+        options=['positive', 'negative', 'inbetween']
     )
-    
-    # Get number of examples annotated per label
-    count = pixt.get_number_of_annotations_per_label(annotations, labels=['positive', 'negative', 'inbetween'])
-    
-    # To display the count in jupyter notebook
-    display(pd.DataFrame.from_dict([count]))
 ```
 
 Preview:
@@ -79,27 +81,24 @@ Code:
     import pigeonXT as pixt
 
     df = pd.DataFrame([
-        {'title': 'Star wars'},
-        {'title': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
-        {'title': 'Eternal Sunshine of the Spotless Mind'},
-        {'title': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},
-        {'title': 'Killer klowns from outer space'},
+        {'example': 'Star wars'},    
+        {'example': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
+        {'example': 'Eternal Sunshine of the Spotless Mind'},
+        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},    
+        {'example': 'Killer klowns from outer space'},    
     ])
 
     labels = ['Adventure', 'Romance', 'Fantasy', 'Science fiction', 'Horror', 'Thriller']
-
-    annotations = pixt.annotate( df.title,
-                          options=labels,
-                          task_type='multilabel-classification',
-                          buttons_in_a_row=3,
-                          reset_buttons_after_click=True,
-                          include_skip=True)
-
-    # Get number of examples annotated per label
-    count = pixt.get_number_of_annotations_per_label(annotations, labels=['positive', 'negative', 'inbetween'])
     
-    # To display the count in jupyter notebook
-    display(pd.DataFrame.from_dict([count]))
+    annotations = pixt.annotate(
+        df, 
+        options=labels, 
+        task_type='multilabel-classification',
+        buttons_in_a_row=3,
+        reset_buttons_after_click=True,
+        include_next=True,
+        include_back=True,
+    )  
 ```
 
 Preview:
@@ -118,16 +117,32 @@ Code:
       options=['cat', 'dog', 'horse'],
       display_fn=lambda filename: display(Image(filename))
     )
-
-    # Get number of examples annotated per label
-    count = pixt.get_number_of_annotations_per_label(annotations, labels=['cat', 'dog', 'horse'])
-
-    # display the count
-    display(pd.DataFrame.from_dict([count]))
 ```
 
 Preview:
 ![Jupyter notebook multi-label classification](/assets/imagelabelexample.png)
+
+
+### Audio classification
+Code:
+```python
+    import pandas as pd
+    import pigeonXT as pixt
+
+    from IPython.display import Audio 
+
+    annotations = pixt.annotate(
+        ['assets/audio_1.mp3', 'assets/audio_2.mp3'],
+        task_type='regression',
+        options=(1,5,1),
+        display_fn=lambda filename: display(Audio(filename, autoplay=True))
+    )
+
+    annotations
+```
+
+Preview:
+![Jupyter notebook multi-label classification](/assets/audiolabelexample.png)
 
 ### multi-label text classification with custom hooks
 Code:
@@ -139,11 +154,11 @@ Code:
     from pigeonXT import annotate
 
     df = pd.DataFrame([
-        {'title': 'Star wars'},
-        {'title': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
-        {'title': 'Eternal Sunshine of the Spotless Mind'},
-        {'title': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},
-        {'title': 'Killer klowns from outer space'},
+        {'example': 'Star wars'},    
+        {'example': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
+        {'example': 'Eternal Sunshine of the Spotless Mind'},
+        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},    
+        {'example': 'Killer klowns from outer space'},    
     ])
 
     labels = ['Adventure', 'Romance', 'Fantasy', 'Science fiction', 'Horror', 'Thriller']
@@ -157,20 +172,24 @@ Code:
         row[labels] = 1
         return row
 
-    def labelPortion(inputFile,
-                     labels = ['yes', 'no'],
-                     outputFile='output.csv',
-                     portionSize=2,
-                     textColumn='title',
-                     shortLabels=None):
+    def labelPortion(
+        inputFile, 
+        labels = ['yes', 'no'], 
+        outputFile='output.csv', 
+        portionSize=2,
+        textColumn='example',
+        shortLabels=None,
+    ):
         if shortLabels == None:
             shortLabels = labels
+
         out = Path(outputFile)
         if out.exists():
             outdf = pd.read_csv(out)
             currentId = outdf.index.max() + 1
         else:
             currentId = 0
+
         indf = pd.read_csv(inputFile)
         examplesInFile = len(indf)
         indf = indf.loc[currentId:currentId + portionSize - 1]
@@ -181,10 +200,10 @@ Code:
         for label in shortLabels:
             indf[label] = None
 
-        def updateRow(title, selectedLabels):
-            print(title, selectedLabels)
+        def updateRow(example, selectedLabels):
+            print(example, selectedLabels)
             labs = setLabels([labels.index(y) for y in selectedLabels], len(labels))
-            indf.loc[indf.title == title, shortLabels] = labs
+            indf.loc[indf[textColumn] == example, shortLabels] = labs
 
         def finalProcessing(annotations):
             if out.exists():
@@ -194,15 +213,26 @@ Code:
                 outdata = indf.copy()
             outdata.to_csv(out, index=False)
 
-        annotated = annotate( sentences,
-                              options=labels,
-                              task_type='multilabel-classification',
-                              buttons_in_a_row=3,
-                              reset_buttons_after_click=True,
-                              include_skip=False,
-                              example_process_fn=updateRow,
-                              final_process_fn=finalProcessing)
+        annotated = annotate( 
+            sentences, 
+            options=labels, 
+            task_type='multilabel-classification',
+            buttons_in_a_row=3,
+            reset_buttons_after_click=True,
+            include_next=False,
+            example_process_fn=updateRow,
+            final_process_fn=finalProcessing
+        )     
         return indf
+
+    def getAnnotationsCountPerlabel(annotations, shortLabels):
+
+        countPerLabel = pd.DataFrame(columns=shortLabels, index=['count'])
+
+        for label in shortLabels:
+            countPerLabel.loc['count', label] = len(annotations.loc[annotations[label] == 1.0])
+
+        return countPerLabel
 
     def getAnnotationsCountPerlabel(annotations, shortLabels):
     
@@ -212,6 +242,7 @@ Code:
             countPerLabel.loc['count', label] = len(annotations.loc[annotations[label] == 1.0])
     
         return countPerLabel
+    
     
     annotations = labelPortion('inputtestdata.csv',
                                labels=labels,
@@ -226,4 +257,3 @@ Preview:
 
 
 The complete and runnable examples are available in the provided Notebook.
-
