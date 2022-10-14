@@ -7,7 +7,8 @@ def annotate(examples,
              options=None,
              shuffle=False,
              include_skip=True,
-             display_fn=display):
+             display_fn=display,
+             change_to_dropdown=5):
     """
     Build an interactive widget for annotating a list of input examples.
 
@@ -75,7 +76,7 @@ def annotate(examples,
     buttons = []
     
     if task_type == 'classification':
-        use_dropdown = len(options) > 5
+        use_dropdown = len(options) > change_to_dropdown
 
         if use_dropdown:
             dd = Dropdown(options=options)
