@@ -136,3 +136,68 @@ def annotate(examples,
     show_next()
 
     return annotations
+
+
+def control_annotations(input_annotations, display_fn=display):
+    """
+    Build an interactive widget for visualizing and cancel annotations
+    Parameters
+    ----------
+    input_annotations: list of tuples, list of annotated examples (example, label) to edit
+    display_fn: func, function for displaying an example to the user
+    Returns
+    -------
+    annotations : list of tuples, list of annotated examples (example, label) corrected
+    """
+    index = len(input_annotations)-1
+    annotations = input_annotations
+
+    def display_controller():
+        with out:
+            clear_output(wait=True)
+            if len(annotations) > 0:
+                print('Annotation #{} : "{}"'.format(
+                    index+1, annotations[index][1]))
+
+                if index==0:
+                    buttons[0].disabled=True
+                else:
+                    buttons[0].disabled=False
+                if index==len(annotations)-1:
+                    buttons[1].disabled=True
+                else:
+                    buttons[1].disabled=False
+                display(HBox(buttons))
+                display_fn(annotations[index][0])
+            else:
+                print('Empty list of annotations.')
+
+    def navigate(num, btn):
+        update_index(num)
+
+    def update_index(num):
+        nonlocal index
+        new_i = index + num
+        if new_i < len(annotations) and new_i >= 0:
+            index = new_i
+        display_controller()
+
+    def cancel(btn):
+        del annotations[index]
+        update_index(-1)
+
+    buttons = []
+    prev_btn = Button(description='previous')
+    prev_btn.on_click(functools.partial(navigate, -1))
+    buttons.append(prev_btn)
+    next_btn = Button(description='next')
+    next_btn.on_click(functools.partial(navigate, 1))
+    buttons.append(next_btn)
+    cancel_btn = Button(description='cancel annotation')
+    cancel_btn.on_click(cancel)
+    buttons.append(cancel_btn)
+
+    out = Output()
+    display(out)
+    display_controller()
+    return
