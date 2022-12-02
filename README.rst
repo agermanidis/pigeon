@@ -55,3 +55,22 @@ Code:
 Preview:
 
 .. image:: http://i.imgur.com/PiE3eDt.gif
+
+- Check and cancel annotations
+
+.. code-block:: python
+
+from pigeon import annotate
+from IPython.display import display, Image
+
+annotations = annotate(
+  ['assets/img_example1.jpg', 'assets/img_example2.jpg'],
+  options=['cat', 'dog', 'horse'],
+  display_fn=lambda filename: display(Image(filename))
+)
+
+control_annotations(annotations, display_fn=lambda filename: display(Image(filename)))
+
+Preview:
+
+.. image:: https://i.imgur.com/v7my6AK.gif
