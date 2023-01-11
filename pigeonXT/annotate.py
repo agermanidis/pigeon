@@ -2,7 +2,7 @@ import random
 from collections import defaultdict
 import functools
 import warnings
-from IPython.display import display, clear_output
+from IPython.display import display, HTML, clear_output
 from ipywidgets import (
         Button,
         Dropdown,
@@ -11,11 +11,15 @@ from ipywidgets import (
         VBox,
         IntSlider,
         FloatSlider,
+        Layout,
         Textarea,
         Output,
         ToggleButton
 )
 import pandas as pd
+import re
+
+
 
 def annotate(
     examples,
@@ -38,6 +42,8 @@ def annotate(
     value_column='label',
     id_column='id',
     return_type='dataframe',
+    bionic_reading=False,
+    checkerboard=False
 ):
     """
     Build an interactive widget for annotating a list or DataFrame of input examples.
@@ -74,8 +80,7 @@ def annotate(
     example_process_fn : function, hooked function to call after each example fn(ix, labels)
     final_process_fn   : function, hooked function to call after annotation is done fn(annotations)
     display_fn         : function, function for displaying an example to the user
-                          Default, it uses the IPython display function
-    
+                          Default, it uses the IPython display function    
     example_column : str, column name which holds all examples. Required when using DataFrame
     value_column   : str
                         column to store the result for classification (not for multilabel), regression,
@@ -86,6 +91,9 @@ def annotate(
     return_type    : str, 'dataframe' or 'dict'
                         By default, annotate will return a DataFrame with the annotations. For compatability,
                         when return_type is 'dict' it can also return a dictionary with changed annotations.
+    
+    checkerboard : displays words in checkerboard pattern
+    bionic_reading : at boldfacing for readability
 
     Returns
     -------
@@ -224,7 +232,25 @@ def annotate(
         # display new example
         with out:
             clear_output(wait=True)
-            display_fn(annotations.at[ix, example_column])
+            example_text = annotations.at[ix, example_column]
+            style_text = "<style>div.output_scroll { height: 88em; width: 100%}</style>"
+
+            if bionic_reading:
+                min_word_bion = 6
+                first_bion_chars = 2
+                example_text = " ".join([f'<b>{word[:first_bion_chars]}</b>{word[first_bion_chars:]}' 
+                    if len(word) > min_word_bion else word for word in example_text.split()])
+
+            if checkerboard:
+                colDict = {}
+                colDict[0] = '#e1e3e1' 
+                colDict[1] = '#bab8b8'
+                example_text = ".".join([f'<span style="background-color:{colDict[k%2]}">{word}</span>' 
+                    for k,word in enumerate(example_text.split("."))])
+
+            decorated_text = HTML(style_text+f"<body><div>{example_text}</div></body>")
+
+            display_fn(decorated_text);
 
     def add_annotation(annotation):
         """
