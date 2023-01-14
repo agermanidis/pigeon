@@ -1,0 +1,36 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: requirements-txt-fixer
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+        args:
+          - --line-length=100
+#  - repo: local
+#    hooks:
+#      - id: pytest-checks
+#        name: pytest-check
+#        entry: pytest
+#        language: system
+#        pass_filenames: false
+#        always_run: true
+  - repo: local
+    hooks:
+      - id: pydocstyle-checks
+        name: pydocstyle-checks
+        entry: pydocstyle
+        language: system
+        pass_filenames: false
+        always_run: true
