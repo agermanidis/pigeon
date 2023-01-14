@@ -9,6 +9,13 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
       - id: requirements-txt-fixer
+  - repo: https://github.com/python-poetry/poetry
+    rev: '1.3.2'
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-export
+        args: ["-f", "requirements.txt", "-o", "requirements.txt"]
   - repo: local
     hooks:
       - id: black
