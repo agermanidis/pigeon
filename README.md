@@ -23,6 +23,7 @@ There is a full blog post on the usage of PigeonXT on [Towards Data Science](htt
 - Dennis Bakhuis
 - Ritesh Agrawal
 - Deepak Tunuguntla
+- Bram van Es
 
 ## Installation
 PigeonXT obviously needs a Jupyter Lab environment. Futhermore, it requires ipywidgets.
@@ -56,6 +57,14 @@ Starting Jupyter Lab environment:
     jupyter lab
 ```
 
+### Development environment
+I have moved the development environment to Poetry. To create an identical environment use:
+```bash
+conda env create -f environment.yml
+conda activate pigeonxt
+poetry install
+```
+
 ## Examples
 Examples are also provided in the accompanying notebook.
 
@@ -64,7 +73,7 @@ Code:
 ```python
     import pandas as pd
     import pigeonXT as pixt
-    
+
     annotations = pixt.annotate(
         ['I love this movie', 'I was really disappointed by the book'],
         options=['positive', 'negative', 'inbetween']
@@ -81,24 +90,24 @@ Code:
     import pigeonXT as pixt
 
     df = pd.DataFrame([
-        {'example': 'Star wars'},    
+        {'example': 'Star wars'},
         {'example': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
         {'example': 'Eternal Sunshine of the Spotless Mind'},
-        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},    
-        {'example': 'Killer klowns from outer space'},    
+        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},
+        {'example': 'Killer klowns from outer space'},
     ])
 
     labels = ['Adventure', 'Romance', 'Fantasy', 'Science fiction', 'Horror', 'Thriller']
-    
+
     annotations = pixt.annotate(
-        df, 
-        options=labels, 
+        df,
+        options=labels,
         task_type='multilabel-classification',
         buttons_in_a_row=3,
         reset_buttons_after_click=True,
         include_next=True,
         include_back=True,
-    )  
+    )
 ```
 
 Preview:
@@ -129,7 +138,7 @@ Code:
     import pandas as pd
     import pigeonXT as pixt
 
-    from IPython.display import Audio 
+    from IPython.display import Audio
 
     annotations = pixt.annotate(
         ['assets/audio_1.mp3', 'assets/audio_2.mp3'],
@@ -154,11 +163,11 @@ Code:
     from pigeonXT import annotate
 
     df = pd.DataFrame([
-        {'example': 'Star wars'},    
+        {'example': 'Star wars'},
         {'example': 'The Positively True Adventures of the Alleged Texas Cheerleader-Murdering Mom'},
         {'example': 'Eternal Sunshine of the Spotless Mind'},
-        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},    
-        {'example': 'Killer klowns from outer space'},    
+        {'example': 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb'},
+        {'example': 'Killer klowns from outer space'},
     ])
 
     labels = ['Adventure', 'Romance', 'Fantasy', 'Science fiction', 'Horror', 'Thriller']
@@ -173,9 +182,9 @@ Code:
         return row
 
     def labelPortion(
-        inputFile, 
-        labels = ['yes', 'no'], 
-        outputFile='output.csv', 
+        inputFile,
+        labels = ['yes', 'no'],
+        outputFile='output.csv',
         portionSize=2,
         textColumn='example',
         shortLabels=None,
@@ -213,16 +222,16 @@ Code:
                 outdata = indf.copy()
             outdata.to_csv(out, index=False)
 
-        annotated = annotate( 
-            sentences, 
-            options=labels, 
+        annotated = annotate(
+            sentences,
+            options=labels,
             task_type='multilabel-classification',
             buttons_in_a_row=3,
             reset_buttons_after_click=True,
             include_next=False,
             example_process_fn=updateRow,
             final_process_fn=finalProcessing
-        )     
+        )
         return indf
 
     def getAnnotationsCountPerlabel(annotations, shortLabels):
@@ -235,15 +244,15 @@ Code:
         return countPerLabel
 
     def getAnnotationsCountPerlabel(annotations, shortLabels):
-    
+
         countPerLabel = pd.DataFrame(columns=shortLabels, index=['count'])
-    
+
         for label in shortLabels:
             countPerLabel.loc['count', label] = len(annotations.loc[annotations[label] == 1.0])
-    
+
         return countPerLabel
-    
-    
+
+
     annotations = labelPortion('inputtestdata.csv',
                                labels=labels,
                                shortLabels= shortLabels)
