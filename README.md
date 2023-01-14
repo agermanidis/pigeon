@@ -63,6 +63,7 @@ I have moved the development environment to Poetry. To create an identical envir
 conda env create -f environment.yml
 conda activate pigeonxt
 poetry install
+pre-commit install
 ```
 
 ## Examples
