@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "pigeonXT-jupyter"
+version = "0.7.0"
+description = "Quickly annotate data in Jupyter notebooks."
+authors = ["Dennis Bakhuis <pypi@bakhuis.nu>"]
+license = "Apache 2.0"
+readme = "README.md"
+homepage = "https://github.com/dennisbakhuis/pigeonXT"
+repository = "https://github.com/dennisbakhuis/pigeonXT"
+keywords = [
+  'artificial inteligence', 'labeling', 'jupyter',
+  'machine learning', 'data science', 'data', 'science',
+]
+include = [
+  "LICENCE",
+]
+packages = [{include = "pigeonXT-jupyter"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.24.1"
+pandas = "^1.5.2"
+jupyterlab = "^3.5.2"
+ipywidgets = "^8.0.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+pre-commit = "^2.21.0"
+pytest = "^7.2.0"
+pydocstyle = "^6.2.3"
+toml = "^0.10.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+[tool.pydocstyle]
+convention = "numpy"

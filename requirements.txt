@@ -1,4 +1,6 @@
-numpy
-pandas
-jupyterlab
-ipywidgets
+ipython~=8.8.0
+ipywidgets~=8.0.4
+jupyterlab~=3.5.2
+numpy~=1.24.1
+pandas~=1.5.2
+setuptools~=65.7.0
