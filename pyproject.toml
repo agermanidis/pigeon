@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pigeonXT-jupyter"
-version = "0.7.1"
+version = "0.7.2"
 description = "Quickly annotate data in Jupyter notebooks."
 authors = ["Dennis Bakhuis <pypi@bakhuis.nu>"]
 license = "Apache 2.0"
@@ -12,9 +12,9 @@ keywords = [
   'machine learning', 'data science', 'data', 'science',
 ]
 include = [
-  "LICENCE",
+  "MIT",
 ]
-packages = [{include = "pigeonXT_jupyter"}]
+packages = [{include = "pigeonXT"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
